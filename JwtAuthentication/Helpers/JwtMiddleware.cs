@@ -48,8 +48,10 @@ namespace JwtAuthentication.Helpers
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var roles = Guid.Parse(jwtToken.Claims.First(x => x.Type == "roles").Value);
 
                 context.Items["User"] = userService.GetById(userId);
+                context.Items["Roles"] = roles;
             }
             catch
             {

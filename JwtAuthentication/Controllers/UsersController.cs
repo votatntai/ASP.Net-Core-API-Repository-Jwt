@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using JwtAuthentication.Models;
 using JwtAuthentication.Services;
-using Microsoft.AspNetCore.Authorization;
-using JwtAuthentication.Data;
-using JwtAuthentication.Entities;
 using System;
+using JwtAuthentication.Data;
+using JwtAuthentication.DataEntity;
+using System.Linq;
 
 namespace JwtAuthentication.Controllers
 {
@@ -31,31 +30,41 @@ namespace JwtAuthentication.Controllers
         }
 
         [HttpPost("Register")]
-        public ActionResult<User> Register(UserRegisterModel model)
+        public ActionResult<UserResponse> Register(UserRegisterModel model)
         {
+            var userId = Guid.NewGuid();
             var user = new User
             {
+                Id = userId,
                 Name = model.Name,
                 Username = model.Username,
                 Email = model.Email,
-                Role = Guid.Parse("9c076c5c-d4d9-4426-b6bf-da7b01c49d81"),
                 Password = model.Password
-                };
-            _userService.Register(user);
-            return CreatedAtAction("GetUser", new { Username = model.Username }, user);
+            };
+            var ur = new UserRole();
+            ur.UserId =  userId ;
+            ur.RoleId = Guid.Parse("72E1494C-CD14-4983-9BB0-0968C559C713");
+            user.UserRoles.Add(ur);
+            return _userService.Register(user);
         }
 
-        [HttpGet("{Username}")]
-        public User GetUser(string username)
+        [HttpGet("{id}")]
+        public UserResponse GetUser(Guid id)
         {
-            var user = _userService.GetUser(username);
-            return user;
+            var u = _userService.GetById(id);
+            return new UserResponse { 
+            Id = u.Id,
+            Role = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
+            Email = u.Email,
+            Name = u.Name,
+            Username = u.Username
+            };
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] Pagination param)
         {
-            var users = _userService.GetAll();
+            var users = _userService.GetAll(param);
             return Ok(users);
         }
     }

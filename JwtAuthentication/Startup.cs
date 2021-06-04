@@ -2,19 +2,16 @@ using JwtAuthentication.Helpers;
 using JwtAuthentication.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using JwtAuthentication.Data;
+using JwtAuthentication.DataEntity;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Text.Json;
 
 namespace JwtAuthentication
 {
@@ -30,19 +27,16 @@ namespace JwtAuthentication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddCors();
             services.AddControllers();
-
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
-
-            services.AddScoped<IUserService, UserService>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "JwtAuthentication", Version = "v1" });
             });
-
-            services.AddDbContext<JwtAuthenticationContext>(options =>
+            services.AddCors();
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.AddScoped<IUserService, UserService>();
+            services.AddHttpContextAccessor();
+            services.AddDbContext<AuthenticationShopContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("JwtAuthenticationContext")));
         }
 

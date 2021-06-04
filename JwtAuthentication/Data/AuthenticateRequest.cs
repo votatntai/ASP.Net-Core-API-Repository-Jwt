@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace JwtAuthentication.Models
+namespace JwtAuthentication.Data
 {
     public class AuthenticateRequest
     {
