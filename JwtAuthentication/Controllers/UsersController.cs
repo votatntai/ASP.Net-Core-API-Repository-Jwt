@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using JwtAuthentication.Services;
-using System;
-using JwtAuthentication.Data;
+﻿using JwtAuthentication.Data;
 using JwtAuthentication.DataEntity;
+using JwtAuthentication.Services;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Linq;
 
 namespace JwtAuthentication.Controllers
@@ -42,7 +42,7 @@ namespace JwtAuthentication.Controllers
                 Password = model.Password
             };
             var ur = new UserRole();
-            ur.UserId =  userId ;
+            ur.UserId = userId;
             ur.RoleId = Guid.Parse("72E1494C-CD14-4983-9BB0-0968C559C713");
             user.UserRoles.Add(ur);
             return _userService.Register(user);
@@ -52,12 +52,13 @@ namespace JwtAuthentication.Controllers
         public UserResponse GetUser(Guid id)
         {
             var u = _userService.GetById(id);
-            return new UserResponse { 
-            Id = u.Id,
-            Role = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
-            Email = u.Email,
-            Name = u.Name,
-            Username = u.Username
+            return new UserResponse
+            {
+                Id = u.Id,
+                Role = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
+                Email = u.Email,
+                Name = u.Name,
+                Username = u.Username
             };
         }
 
