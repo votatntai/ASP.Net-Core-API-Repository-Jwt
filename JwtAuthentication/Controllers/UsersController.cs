@@ -8,7 +8,6 @@ using System.Linq;
 namespace JwtAuthentication.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
     public class UsersController : ControllerBase
     {
         private IUserService _userService;
@@ -18,7 +17,8 @@ namespace JwtAuthentication.Controllers
             _userService = userService;
         }
 
-        [HttpPost("Authenticate")]
+        [HttpPost]
+        [Route("Users/Authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model)
         {
             var response = _userService.Authenticate(model);
@@ -29,7 +29,8 @@ namespace JwtAuthentication.Controllers
             return Ok(response);
         }
 
-        [HttpPost("Register")]
+        [HttpPost]
+        [Route("Users/Register")]
         public ActionResult<UserResponse> Register(UserRegisterModel model)
         {
             var userId = Guid.NewGuid();
@@ -48,7 +49,8 @@ namespace JwtAuthentication.Controllers
             return _userService.Register(user);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("Users/View/{id}")]
         public UserResponse GetUser(Guid id)
         {
             var u = _userService.GetById(id);
@@ -63,6 +65,8 @@ namespace JwtAuthentication.Controllers
         }
 
         [HttpGet]
+        [Route("Users")]
+        [Authorize("Admin")]
         public IActionResult GetAll([FromQuery] Pagination param)
         {
             var users = _userService.GetAll(param);

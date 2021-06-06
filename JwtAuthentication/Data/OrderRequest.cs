@@ -8,6 +8,6 @@ namespace JwtAuthentication.Data
     public class OrderRequest
     {
         public Guid UserId { get; set; }
-        public OrderDetailsRequest[] OrderDetails { get; set; }
+        public ICollection<OrderDetailsRequest> OrderDetails { get; set; }
     }
 }

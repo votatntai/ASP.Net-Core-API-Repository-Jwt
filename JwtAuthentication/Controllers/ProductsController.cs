@@ -9,7 +9,6 @@ using JwtAuthentication.Data;
 
 namespace JwtAuthentication.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
@@ -22,6 +21,7 @@ namespace JwtAuthentication.Controllers
 
         // GET: api/Products
         [HttpGet]
+        [Route("Products")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts([FromQuery] Pagination param)
         {
             return await _context.Products.Select(x => new ProductResponse
@@ -29,15 +29,18 @@ namespace JwtAuthentication.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 Maker = x.Maker,
+                Category = x.Category,
                 MinQuantity = x.MinQuantity,
                 Price = x.Price,
                 Quantity = x.Quantity,
+                ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
         // GET: api/Products/5
-        [HttpGet("{id}")]
+        [HttpGet]
+        [Route("Products/{id}")]
         public async Task<ActionResult<ProductResponse>> GetProduct(Guid id)
         {
             var product = await _context.Products.Where(x => x.Id == id).Select(x => new ProductResponse
@@ -45,9 +48,11 @@ namespace JwtAuthentication.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 Maker = x.Maker,
+                Category = x.Category,
                 MinQuantity = x.MinQuantity,
                 Price = x.Price,
                 Quantity = x.Quantity,
+                ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).FirstOrDefaultAsync();
 
@@ -60,7 +65,8 @@ namespace JwtAuthentication.Controllers
         }
 
         // GET: api/Products/Name/abc
-        [HttpGet("name/{value}")]
+        [HttpGet]
+        [Route("Products/Name/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByName(string value, [FromQuery] Pagination param)
         {
             return await _context.Products.Where(x => x.Name.Equals(value)).Select(x => new ProductResponse
@@ -68,15 +74,18 @@ namespace JwtAuthentication.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 Maker = x.Maker,
+                Category = x.Category,
                 MinQuantity = x.MinQuantity,
                 Price = x.Price,
                 Quantity = x.Quantity,
+                ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
         // GET: api/Products/Maker/abc
-        [HttpGet("maker/{value}")]
+        [HttpGet]
+        [Route("Products/Maker/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByMaker(string value, [FromQuery] Pagination param)
         {
             return await _context.Products.Where(x => x.Maker.Equals(value)).Select(x => new ProductResponse
@@ -84,15 +93,18 @@ namespace JwtAuthentication.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 Maker = x.Maker,
+                Category = x.Category,
                 MinQuantity = x.MinQuantity,
                 Price = x.Price,
                 Quantity = x.Quantity,
+                ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
         // GET: api/Products/Price/
-        [HttpGet("price/{min}/{max}")]
+        [HttpGet]
+        [Route("Products/Price/{min}/{max}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByPrice(decimal min, decimal max, [FromQuery] Pagination param)
         {
             return await _context.Products.Where(x => x.Price > min && x.Price < max).Select(x => new ProductResponse
@@ -100,15 +112,92 @@ namespace JwtAuthentication.Controllers
                 Id = x.Id,
                 Name = x.Name,
                 Maker = x.Maker,
+                Category = x.Category,
                 MinQuantity = x.MinQuantity,
                 Price = x.Price,
                 Quantity = x.Quantity,
+                ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
+        // POST: api/Products
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        [Route("Products/Add")]
+        public async Task<ActionResult<ProductResponse>> PostProduct(ProductRequest pror)
+        {
+            var id = Guid.NewGuid();
+            var product = new Product
+            {
+                Id = id,
+                Name = pror.Name,
+                Maker = pror.Maker,
+                Category = pror.Category,
+                Price = pror.Price,
+                Quantity = pror.Quantity,
+                MinQuantity = pror.MinQuantity,
+                ImageUrl = pror.ImageUrl
+            };
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            return new ProductResponse {
+                Id = id,
+                Name = pror.Name,
+                Maker = pror.Maker,
+                Category = pror.Category,
+                Price = pror.Price,
+                Quantity = pror.Quantity,
+                MinQuantity = pror.MinQuantity,
+                ImageUrl = pror.ImageUrl
+            };
+        }
+
+        // PUT: api/Products
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        [Route("Products/Update")]
+        public async Task<IActionResult> PutProduct(Guid id, ProductRequest pror)
+        {
+
+            var product = new Product
+            {
+                Id = id,
+                Name = pror.Name,
+                Maker = pror.Maker,
+                Category = pror.Category,
+                Price = pror.Price,
+                Quantity = pror.Quantity,
+                MinQuantity = pror.MinQuantity,
+                ImageUrl = pror.ImageUrl,
+                CreateDate = DateTime.Now
+            };
+
+            _context.Entry(product).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ProductExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+
         // DELETE: api/Products/5
-        [HttpDelete("{id}")]
+        [HttpDelete]
+        [Route("Products/Delete/{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
             var product = await _context.Products.FindAsync(id);

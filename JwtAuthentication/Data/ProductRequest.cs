@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace JwtAuthentication.DataEntity
+namespace JwtAuthentication.Data
 {
-    public partial class Product
+    public class ProductRequest
     {
-        public Product()
-        {
-            OrderDetails = new HashSet<OrderDetail>();
-        }
-
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Maker { get; set; }
         public string Category { get; set; }
@@ -18,8 +14,5 @@ namespace JwtAuthentication.DataEntity
         public decimal Price { get; set; }
         public int MinQuantity { get; set; }
         public string ImageUrl { get; set; }
-        public DateTime CreateDate { get; set; }
-
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
     }
 }
