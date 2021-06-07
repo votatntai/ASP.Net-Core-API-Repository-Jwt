@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using JwtAuthentication.DataEntity;
 using JwtAuthentication.Data;
 using Microsoft.AspNetCore.Http;
+using System.Security.Cryptography.X509Certificates;
 
 namespace JwtAuthentication.Controllers
 {
@@ -82,6 +83,7 @@ namespace JwtAuthentication.Controllers
             var order = _context.Orders.Where(x => x.Id == id).FirstOrDefault();
 
             var orderDetail = _context.OrderDetails.Where(x => x.OrderId == id);
+
             _context.OrderDetails.RemoveRange(orderDetail);
 
             order.OrderDetails = odrq.OrderDetails.Select(x => new OrderDetail
@@ -97,6 +99,45 @@ namespace JwtAuthentication.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // PUT: api/Orders/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut]
+        [Route("Orders/Confirm/{id}")]
+        public async Task<IActionResult> ConfirmOrder(Guid id)
+        {
+            var order = _context.Orders.Where(x => x.Id == id).FirstOrDefault();
+
+            var orderd = _context.OrderDetails.Where(a => a.OrderId == id).ToList();
+
+            List<Product> list = new List<Product>();
+
+            foreach (var item in orderd)
+            {
+                var product = _context.Products.Where(x => x.Id == item.ProductId).FirstOrDefault();
+                int orq = item.Quantity;
+                product.Quantity = product.Quantity - orq;
+                if (product.Quantity >= 0)
+                {
+                    list.Add(product);
+                }
+            }
+
+            if (list.Count != orderd.Select(x => x.Product).Count())
+            {
+                return Content("The quantity in stock is not enough for your order");
+            }
+
+            _context.Products.UpdateRange(list);
+
+            order.Status = "Confirmed";
+
+            _context.Orders.Update(order);
+
+            await _context.SaveChangesAsync();
+
+            return Content("Confirmed");
         }
 
         // POST: api/Orders

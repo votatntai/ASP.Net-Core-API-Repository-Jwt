@@ -27,6 +27,7 @@ namespace JwtAuthentication.Services
         private readonly AuthenticationShopContext _context;
 
         private readonly AppSettings _appSettings;
+
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UserService(IOptions<AppSettings> appSettings, AuthenticationShopContext context, IHttpContextAccessor httpContextAccessor)
