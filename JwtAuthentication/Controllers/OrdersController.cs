@@ -109,6 +109,11 @@ namespace JwtAuthentication.Controllers
         {
             var order = _context.Orders.Where(x => x.Id == id).FirstOrDefault();
 
+            if (order.Status == "Confirmed")
+            {
+                return Content("Previously confirmed order");
+            }
+
             var orderd = _context.OrderDetails.Where(a => a.OrderId == id).ToList();
 
             List<Product> list = new List<Product>();
@@ -184,9 +189,21 @@ namespace JwtAuthentication.Controllers
             };
         }
 
-        private bool OrderExists(Guid id)
+        // DELETE: api/Orders/5
+        [HttpDelete]
+        [Route("Orders/Delete/{id}")]
+        public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            return _context.Orders.Any(e => e.Id == id);
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+
+            return Content("The order has been successfully deleted");
         }
     }
 }

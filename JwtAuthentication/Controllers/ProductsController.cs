@@ -141,7 +141,8 @@ namespace JwtAuthentication.Controllers
             };
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            return new ProductResponse {
+            return new ProductResponse
+            {
                 Id = id,
                 Name = pror.Name,
                 Maker = pror.Maker,
@@ -159,10 +160,13 @@ namespace JwtAuthentication.Controllers
         [Route("Products/Update")]
         public async Task<IActionResult> PutProduct(Guid id, ProductRequest pror)
         {
-
-            var product = new Product
+            if (!ProductExists(id))
             {
-                Id = id,
+                return NotFound();
+            }
+
+            var product = _context.Products.Where(x => x.Id == id).Select(a => new Product
+            {
                 Name = pror.Name,
                 Maker = pror.Maker,
                 Category = pror.Category,
@@ -170,28 +174,13 @@ namespace JwtAuthentication.Controllers
                 Quantity = pror.Quantity,
                 MinQuantity = pror.MinQuantity,
                 ImageUrl = pror.ImageUrl,
-                CreateDate = DateTime.Now
-            };
+            }).FirstOrDefault();
 
-            _context.Entry(product).State = EntityState.Modified;
+            _context.Update(product);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Content("The product has been successfully updated");
         }
 
 
@@ -209,7 +198,7 @@ namespace JwtAuthentication.Controllers
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Content("The product has been successfully deleted");
         }
 
         private bool ProductExists(Guid id)

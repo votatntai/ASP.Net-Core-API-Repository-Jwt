@@ -49,13 +49,13 @@ namespace JwtAuthentication.DataEntity
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Orders__UserId__34C8D9D1");
+                    .HasConstraintName("FK__Orders__UserId__398D8EEE");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderDet__08D097A3D31046E3");
+                    .HasName("PK__OrderDet__08D097A32E2D0E58");
 
                 entity.Property(e => e.CreateDate)
                     .HasColumnType("datetime")
@@ -65,13 +65,13 @@ namespace JwtAuthentication.DataEntity
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderDeta__Order__3A81B327");
+                    .HasConstraintName("FK__OrderDeta__Order__37A5467C");
 
                 entity.HasOne(d => d.Product)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderDeta__Produ__398D8EEE");
+                    .HasConstraintName("FK__OrderDeta__Produ__38996AB5");
             });
 
             modelBuilder.Entity<Product>(entity =>
@@ -117,7 +117,7 @@ namespace JwtAuthentication.DataEntity
 
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasIndex(e => e.Username, "UQ__Users__536C85E4316F43F1")
+                entity.HasIndex(e => e.Username, "UQ__Users__536C85E46F7DA8DF")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
@@ -147,22 +147,22 @@ namespace JwtAuthentication.DataEntity
 
             modelBuilder.Entity<UserRole>(entity =>
             {
-                entity.HasKey(e => new { e.RoleId, e.UserId })
-                    .HasName("PK__UserRole__07A097A4F31057D1");
+                entity.HasKey(e => new { e.UserId, e.RoleId })
+                    .HasName("PK__UserRole__AF2760AD104E3B45");
 
                 entity.ToTable("UserRole");
 
                 entity.HasOne(d => d.Role)
-                    .WithMany()
+                    .WithMany(p => p.UserRoles)
                     .HasForeignKey(d => d.RoleId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__UserRole__RoleId__2D27B809");
+                    .HasConstraintName("FK__UserRole__RoleId__3A81B327");
 
                 entity.HasOne(d => d.User)
-                    .WithMany()
+                    .WithMany(p => p.UserRoles)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__UserRole__UserId__2C3393D0");
+                    .HasConstraintName("FK__UserRole__UserId__3B75D760");
             });
 
             OnModelCreatingPartial(modelBuilder);
