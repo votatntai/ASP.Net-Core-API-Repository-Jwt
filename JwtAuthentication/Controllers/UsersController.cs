@@ -31,7 +31,7 @@ namespace JwtAuthentication.Controllers
 
         [HttpPost]
         [Route("Users/Register")]
-        public ActionResult<UserResponse> Register(UserRegisterModel model)
+        public ActionResult<AuthenticateResponse> Register(UserRegisterModel model)
         {
             var userId = Guid.NewGuid();
             var user = new User
@@ -44,9 +44,40 @@ namespace JwtAuthentication.Controllers
             };
             var ur = new UserRole();
             ur.UserId = userId;
-            ur.RoleId = Guid.Parse("72E1494C-CD14-4983-9BB0-0968C559C713");
+            ur.RoleId = Guid.Parse("9c076c5c-d4d9-4426-b6bf-da7b01c49d81");
             user.UserRoles.Add(ur);
-            return _userService.Register(user);
+
+            _userService.Register(user);
+
+            var authenticate = new AuthenticateRequest
+            {
+                Username = user.Username,
+                Password = user.Password
+            };
+
+            return _userService.Authenticate(authenticate);
+        }
+
+        [Authorize("Admin")]
+        [HttpPost]
+        [Route("Admin/Users/Register")]
+        public ActionResult<UserResponse> RegisterWithRoles(UserRegisterWithRole model)
+        {
+            var userId = Guid.NewGuid();
+            var user = new User
+            {
+                Id = userId,
+                Name = model.Name,
+                Username = model.Username,
+                Email = model.Email,
+                Password = model.Password
+            };
+
+
+            _userService.Register(user);
+
+            return _userService.AddRoles(userId, model);
+
         }
 
         [HttpGet]
@@ -57,7 +88,7 @@ namespace JwtAuthentication.Controllers
             return new UserResponse
             {
                 Id = u.Id,
-                Role = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
+                Roles = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
                 Email = u.Email,
                 Name = u.Name,
                 Username = u.Username

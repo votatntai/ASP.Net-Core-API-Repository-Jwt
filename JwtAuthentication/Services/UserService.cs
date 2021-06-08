@@ -17,6 +17,7 @@ namespace JwtAuthentication.Services
     public interface IUserService
     {
         AuthenticateResponse Authenticate(AuthenticateRequest model);
+        UserResponse AddRoles(Guid id, UserRegisterWithRole model);
         UserResponse Register(User user);
         IEnumerable<UserResponse> GetAll(Pagination param);
         User GetById(Guid id);
@@ -68,9 +69,40 @@ namespace JwtAuthentication.Services
                 Username = u.Username,
                 Email = u.Email,
                 Name = u.Name,
-                Role = u.UserRoles.Select(x => x.Role?.RoleName).ToArray()
+                Roles = u.UserRoles.Select(x => x.Role?.RoleName).ToArray()
             };
             return ur;
+        }
+
+        public UserResponse AddRoles(Guid id, UserRegisterWithRole model)
+        {
+            var roles = _context.Roles.ToList();
+
+            var uroles = model.Roles;
+
+            List<UserRole> list = new List<UserRole>();
+
+            foreach (var item in uroles)
+            {
+                var usr = new UserRole();
+                usr.UserId = id;
+                usr.RoleId = roles.Where(x => x.RoleName.Equals(item)).Select(x => x.Id).FirstOrDefault();
+                list.Add(usr);
+            }
+            _context.UserRoles.AddRange(list);
+
+            _context.SaveChanges();
+
+            var roleName = list.Select(x => x.Role.RoleName).ToList();
+
+            return new UserResponse
+            {
+                Id = id,
+                Name = model.Name,
+                Email = model.Email,
+                Username = model.Username,
+                Roles = roleName
+            };
         }
 
         public IEnumerable<UserResponse> GetAll(Pagination param)
@@ -81,7 +113,7 @@ namespace JwtAuthentication.Services
                 Username = x.Username,
                 Email = x.Email,
                 Name = x.Name,
-                Role = x.UserRoles.Select(x => x.Role.RoleName).ToArray()
+                Roles = x.UserRoles.Select(x => x.Role.RoleName).ToArray()
             }).OrderBy(x => x.Email).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
         }
 

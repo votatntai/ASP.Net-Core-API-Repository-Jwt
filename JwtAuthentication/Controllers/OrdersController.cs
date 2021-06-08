@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using JwtAuthentication.DataEntity;
 using JwtAuthentication.Data;
 using Microsoft.AspNetCore.Http;
-using System.Security.Cryptography.X509Certificates;
 
 namespace JwtAuthentication.Controllers
 {
