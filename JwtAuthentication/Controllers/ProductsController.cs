@@ -27,6 +27,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
+                Description = x.Description,
                 Maker = x.Maker,
                 Category = x.Category,
                 MinQuantity = x.MinQuantity,
@@ -50,6 +51,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
+                Description = x.Description,
                 Maker = x.Maker,
                 Category = x.Category,
                 MinQuantity = x.MinQuantity,
@@ -75,6 +77,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
+                Description = x.Description,
                 Maker = x.Maker,
                 Category = x.Category,
                 MinQuantity = x.MinQuantity,
@@ -100,6 +103,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
+                Description = x.Description,
                 Maker = x.Maker,
                 Category = x.Category,
                 MinQuantity = x.MinQuantity,
@@ -125,6 +129,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = x.Id,
                 Name = x.Name,
+                Description = x.Description,
                 Maker = x.Maker,
                 Category = x.Category,
                 MinQuantity = x.MinQuantity,
@@ -152,6 +157,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = id,
                 Name = pror.Name,
+                Description = pror.Description,
                 Maker = pror.Maker,
                 Category = pror.Category,
                 Price = pror.Price,
@@ -165,6 +171,7 @@ namespace JwtAuthentication.Controllers
             {
                 Id = id,
                 Name = pror.Name,
+                Description = pror.Description,
                 Maker = pror.Maker,
                 Category = pror.Category,
                 Price = pror.Price,
@@ -187,6 +194,7 @@ namespace JwtAuthentication.Controllers
             var product = _context.Products.Where(x => x.Id == id).Select(a => new Product
             {
                 Name = pror.Name,
+                Description = pror.Description,
                 Maker = pror.Maker,
                 Category = pror.Category,
                 Price = pror.Price,

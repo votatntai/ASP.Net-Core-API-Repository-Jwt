@@ -24,7 +24,7 @@ namespace JwtAuthentication.Controllers
         [Route("Orders")]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrders([FromQuery] Pagination param)
         {
-            return await _context.Orders.Include(x => x.OrderDetails).Select(x => new OrderResponse
+            var orders = await _context.Orders.Include(x => x.OrderDetails).Select(x => new OrderResponse
             {
                 Id = x.Id,
                 UserId = x.UserId,
@@ -37,8 +37,15 @@ namespace JwtAuthentication.Controllers
                     Price = x.Price,
                     Quantity = x.Quantity,
                     CreateDate = x.CreateDate
-                }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToArray()
+                }).ToArray()
             }).ToListAsync();
+            var total = orders.Count();
+            var result = orders.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<OrderResponse>(result)
+            {
+                Total = total,
+                Type = "Orders"
+            });
         }
 
         [Authorize("Saler", "User")]
@@ -46,7 +53,7 @@ namespace JwtAuthentication.Controllers
         [Route("Orders/{id}")]
         public async Task<ActionResult<OrderResponse>> GetOrderDetail(Guid id)
         {
-            var orderDetail = await _context.Orders.Where(x => x.Id.Equals(id)).Include(x => x.OrderDetails).Select(x => new OrderResponse
+            var order = await _context.Orders.Where(x => x.Id.Equals(id)).Include(x => x.OrderDetails).Select(x => new OrderResponse
             {
                 Id = x.Id,
                 Status = x.Status,
@@ -62,20 +69,20 @@ namespace JwtAuthentication.Controllers
                 }).ToArray()
             }).FirstOrDefaultAsync();
 
-            if (orderDetail == null)
+            if (order == null)
             {
                 return NotFound();
             }
 
-            return orderDetail;
+            return order;
         }
 
         [Authorize("User")]
         [HttpGet]
         [Route("Orders/MyOrders")]
-        public async Task<ActionResult<ICollection<OrderResponse>>> GetMyOrders()
+        public async Task<ActionResult<ICollection<OrderResponse>>> GetMyOrders([FromQuery] Pagination param)
         {
-            var user = (User) HttpContext.Items["User"];
+            var user = (User)HttpContext.Items["User"];
             var myod = await _context.Orders.Where(x => x.UserId == user.Id).Include(x => x.OrderDetails).Select(x => new OrderResponse
             {
                 Id = x.Id,
@@ -92,7 +99,13 @@ namespace JwtAuthentication.Controllers
                 }).ToArray()
             }).ToListAsync();
 
-            return myod;
+            var total = myod.Count();
+            var result = myod.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<OrderResponse>(result)
+            {
+                Total = total,
+                Type = "Orders"
+            });
         }
 
         [Authorize("User")]
@@ -100,7 +113,7 @@ namespace JwtAuthentication.Controllers
         [Route("Orders/Update/{id}")]
         public async Task<IActionResult> PutOrder(OrderRequest odrq)
         {
-            var user = (User) HttpContext.Items["User"];
+            var user = (User)HttpContext.Items["User"];
 
             var id = _context.Orders.Where(x => x.UserId == user.Id).Select(x => x.Id).FirstOrDefault();
 
@@ -172,7 +185,7 @@ namespace JwtAuthentication.Controllers
         [Route("Orders/Checkout")]
         public async Task<ActionResult<OrderResponse>> PostOrderDetail(OrderRequest orderRequest)
         {
-            var user = (User) HttpContext.Items["User"];
+            var user = (User)HttpContext.Items["User"];
 
             var orderId = Guid.NewGuid();
 

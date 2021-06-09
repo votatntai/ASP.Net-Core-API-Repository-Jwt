@@ -89,6 +89,10 @@ namespace JwtAuthentication.DataEntity
                     .HasMaxLength(256)
                     .HasColumnName("ImageURL");
 
+                entity.Property(e => e.Description)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
                 entity.Property(e => e.Maker)
                     .IsRequired()
                     .HasMaxLength(256);
