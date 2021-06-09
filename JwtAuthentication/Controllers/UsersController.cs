@@ -121,7 +121,8 @@ namespace JwtAuthentication.Controllers
             var users = _userService.GetAll(param);
             return Ok(new ResponsePagination<UserResponse>(users)
             {
-                Total = _userService.TotalUser()
+                Total = _userService.TotalUser(),
+                Type = "Users"
             });
         }
     }

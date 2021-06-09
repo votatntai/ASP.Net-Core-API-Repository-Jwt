@@ -23,7 +23,7 @@ namespace JwtAuthentication.Controllers
         [Route("Products")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts([FromQuery] Pagination param)
         {
-            return await _context.Products.Select(x => new ProductResponse
+            var products = await _context.Products.Select(x => new ProductResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -35,6 +35,11 @@ namespace JwtAuthentication.Controllers
                 ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
+            return Ok(new ResponsePagination<ProductResponse>(products)
+            {
+                Total = _context.Products.Count(),
+                Type = "Products"
+            });
         }
 
         [HttpGet]
@@ -66,7 +71,7 @@ namespace JwtAuthentication.Controllers
         [Route("Products/Name/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByName(string value, [FromQuery] Pagination param)
         {
-            return await _context.Products.Where(x => x.Name.Equals(value)).Select(x => new ProductResponse
+            var products = await _context.Products.Where(x => x.Name.Contains(value)).Select(x => new ProductResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -77,14 +82,21 @@ namespace JwtAuthentication.Controllers
                 Quantity = x.Quantity,
                 ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
-            }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
+            }).ToListAsync();
+            var total = products.Count();
+            var result = products.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<ProductResponse>(result)
+            {
+                Total = total,
+                Type = "Products"
+            });
         }
 
         [HttpGet]
         [Route("Products/Maker/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByMaker(string value, [FromQuery] Pagination param)
         {
-            return await _context.Products.Where(x => x.Maker.Equals(value)).Select(x => new ProductResponse
+            var products = await _context.Products.Where(x => x.Maker.Contains(value)).Select(x => new ProductResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -95,14 +107,21 @@ namespace JwtAuthentication.Controllers
                 Quantity = x.Quantity,
                 ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
-            }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
+            }).ToListAsync();
+            var total = products.Count();
+            var result = products.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<ProductResponse>(result)
+            {
+                Total = total,
+                Type = "Products"
+            });
         }
 
         [HttpGet]
         [Route("Products/Price/{min}/{max}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByPrice(decimal min, decimal max, [FromQuery] Pagination param)
         {
-            return await _context.Products.Where(x => x.Price > min && x.Price < max).Select(x => new ProductResponse
+            var products = await _context.Products.Where(x => x.Price > min && x.Price < max).Select(x => new ProductResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -113,7 +132,14 @@ namespace JwtAuthentication.Controllers
                 Quantity = x.Quantity,
                 ImageUrl = x.ImageUrl,
                 CreateDate = x.CreateDate
-            }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
+            }).ToListAsync();
+            var total = products.Count();
+            var result = products.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<ProductResponse>(result)
+            {
+                Total = total,
+                Type = "Products"
+            });
         }
 
         [Authorize("Modifier")]

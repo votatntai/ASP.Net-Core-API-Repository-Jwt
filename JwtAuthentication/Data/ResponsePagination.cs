@@ -10,6 +10,7 @@ namespace JwtAuthentication.Data
             Message = "Successfull";
         }
         public string Message { get; set; }
+        public string Type { get; set; }
         public int Total { get; set; }
         public IEnumerable<T> Data { get; set; }
     }

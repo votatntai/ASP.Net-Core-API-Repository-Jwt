@@ -137,7 +137,7 @@ namespace JwtAuthentication.Services
 
         public int TotalUser()
         {
-            return _context.Users.ToList().Count();
+            return _context.Users.Count();
         }
 
         public User GetById(Guid id)
