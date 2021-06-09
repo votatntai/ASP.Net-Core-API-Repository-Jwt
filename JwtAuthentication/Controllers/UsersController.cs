@@ -17,7 +17,7 @@ namespace JwtAuthentication.Controllers
             _userService = userService;
         }
 
-        [HttpPost]
+        [HttpPost] 
         [Route("Users/Authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model)
         {
