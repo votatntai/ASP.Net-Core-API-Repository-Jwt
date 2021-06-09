@@ -88,7 +88,7 @@ namespace JwtAuthentication.Controllers
 
             if (result != "Valid")
             {
-                return Content(result);
+                return StatusCode(400, result);
             }
 
             _userService.Register(user);
