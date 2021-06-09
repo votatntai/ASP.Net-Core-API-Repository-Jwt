@@ -220,7 +220,7 @@ namespace JwtAuthentication.Controllers
 
             if (product == null)
             {
-                return NotFound();
+                return StatusCode(404, "Product does not exist");
             }
 
             if (piord != null)
