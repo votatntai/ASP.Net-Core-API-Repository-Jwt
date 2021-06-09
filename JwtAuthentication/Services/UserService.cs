@@ -19,6 +19,7 @@ namespace JwtAuthentication.Services
         AuthenticateResponse Authenticate(AuthenticateRequest model);
         UserResponse AddRoles(Guid id, UserRegisterWithRole model);
         UserResponse Register(User user);
+        string UserExist(User user);
         IEnumerable<UserResponse> GetAll(Pagination param);
         User GetById(Guid id);
     }
@@ -58,6 +59,22 @@ namespace JwtAuthentication.Services
             return u;
         }
 
+        public string UserExist(User user)
+        {
+            var result = "Valid";
+            var usn = _context.Users.Where(x => x.Username == user.Username).Count();
+            var email = _context.Users.Where(x => x.Email == user.Email).Count();
+            if (usn > 0)
+            {
+                result = "Username already exists";
+            }
+            if (email > 0)
+            {
+                result = "Email already exists";
+            }
+            return result;
+        }
+
         public UserResponse Register(User user)
         {
             _context.Users.Add(user);
@@ -69,7 +86,7 @@ namespace JwtAuthentication.Services
                 Username = u.Username,
                 Email = u.Email,
                 Name = u.Name,
-                Roles = u.UserRoles.Select(x => x.Role?.RoleName).ToArray()
+                Roles = u.UserRoles.Select(x => x.Role.RoleName).ToArray()
             };
             return ur;
         }

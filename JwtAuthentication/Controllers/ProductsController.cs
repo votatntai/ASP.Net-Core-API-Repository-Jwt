@@ -19,7 +19,6 @@ namespace JwtAuthentication.Controllers
             _context = context;
         }
 
-        // GET: api/Products
         [HttpGet]
         [Route("Products")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProducts([FromQuery] Pagination param)
@@ -38,7 +37,6 @@ namespace JwtAuthentication.Controllers
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
-        // GET: api/Products/5
         [HttpGet]
         [Route("Products/{id}")]
         public async Task<ActionResult<ProductResponse>> GetProduct(Guid id)
@@ -64,7 +62,6 @@ namespace JwtAuthentication.Controllers
             return product;
         }
 
-        // GET: api/Products/Name/abc
         [HttpGet]
         [Route("Products/Name/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByName(string value, [FromQuery] Pagination param)
@@ -83,7 +80,6 @@ namespace JwtAuthentication.Controllers
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
-        // GET: api/Products/Maker/abc
         [HttpGet]
         [Route("Products/Maker/{value}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByMaker(string value, [FromQuery] Pagination param)
@@ -102,7 +98,6 @@ namespace JwtAuthentication.Controllers
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
-        // GET: api/Products/Price/
         [HttpGet]
         [Route("Products/Price/{min}/{max}")]
         public async Task<ActionResult<IEnumerable<ProductResponse>>> GetProductsByPrice(decimal min, decimal max, [FromQuery] Pagination param)
@@ -121,8 +116,7 @@ namespace JwtAuthentication.Controllers
             }).OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToListAsync(); ;
         }
 
-        // POST: api/Products
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize("Modifier")]
         [HttpPost]
         [Route("Products/Add")]
         public async Task<ActionResult<ProductResponse>> PostProduct(ProductRequest pror)
@@ -154,8 +148,7 @@ namespace JwtAuthentication.Controllers
             };
         }
 
-        // PUT: api/Products
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize("Modifier")]
         [HttpPut]
         [Route("Products/Update")]
         public async Task<IActionResult> PutProduct(Guid id, ProductRequest pror)
@@ -183,18 +176,23 @@ namespace JwtAuthentication.Controllers
             return Content("The product has been successfully updated");
         }
 
-
-        // DELETE: api/Products/5
+        [Authorize("Modifier")]
         [HttpDelete]
         [Route("Products/Delete/{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)
         {
             var product = await _context.Products.FindAsync(id);
+            var piord = _context.OrderDetails.Where(x => x.ProductId == id).FirstOrDefault();
+
             if (product == null)
             {
                 return NotFound();
             }
 
+            if (piord != null)
+            {
+                return Content("This product has in the orders, can not remove");
+            }
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 

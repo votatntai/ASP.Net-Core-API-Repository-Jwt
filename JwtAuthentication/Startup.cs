@@ -7,11 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using JwtAuthentication.Data;
 using JwtAuthentication.DataEntity;
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using System.Text.Json;
 
 namespace JwtAuthentication
 {

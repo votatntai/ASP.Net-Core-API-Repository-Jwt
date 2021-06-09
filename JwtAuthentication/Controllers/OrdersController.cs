@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using JwtAuthentication.DataEntity;
 using JwtAuthentication.Data;
-using Microsoft.AspNetCore.Http;
 
 namespace JwtAuthentication.Controllers
 {
@@ -20,7 +19,7 @@ namespace JwtAuthentication.Controllers
             _context = context;
         }
 
-        // GET: api/Orders
+        [Authorize("Admin", "Saler")]
         [HttpGet]
         [Route("Orders")]
         public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrders([FromQuery] Pagination param)
@@ -42,7 +41,7 @@ namespace JwtAuthentication.Controllers
             }).ToListAsync();
         }
 
-        // GET: api/Orders/5
+        [Authorize("Saler", "User")]
         [HttpGet]
         [Route("Orders/{id}")]
         public async Task<ActionResult<OrderResponse>> GetOrderDetail(Guid id)
@@ -71,13 +70,39 @@ namespace JwtAuthentication.Controllers
             return orderDetail;
         }
 
-        // PUT: api/Orders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize("User")]
+        [HttpGet]
+        [Route("Orders/MyOrders")]
+        public async Task<ActionResult<ICollection<OrderResponse>>> GetMyOrders()
+        {
+            var user = (User) HttpContext.Items["User"];
+            var myod = await _context.Orders.Where(x => x.UserId == user.Id).Include(x => x.OrderDetails).Select(x => new OrderResponse
+            {
+                Id = x.Id,
+                Status = x.Status,
+                UserId = x.UserId,
+                CreateDate = x.CreateDate,
+                OrderDetails = x.OrderDetails.Select(x => new OrderDetailsResponse
+                {
+                    OrderId = x.OrderId,
+                    ProductId = x.ProductId,
+                    CreateDate = x.CreateDate,
+                    Price = x.Price,
+                    Quantity = x.Quantity
+                }).ToArray()
+            }).ToListAsync();
+
+            return myod;
+        }
+
+        [Authorize("User")]
         [HttpPut]
         [Route("Orders/Update/{id}")]
-        public async Task<IActionResult> PutOrder(Guid id, OrderRequest odrq)
+        public async Task<IActionResult> PutOrder(OrderRequest odrq)
         {
-            var user = _context.Users.Where(x => x.Id.Equals(odrq.UserId)).Include(x => x.Orders).FirstOrDefault();
+            var user = (User) HttpContext.Items["User"];
+
+            var id = _context.Orders.Where(x => x.UserId == user.Id).Select(x => x.Id).FirstOrDefault();
 
             var order = _context.Orders.Where(x => x.Id == id).FirstOrDefault();
 
@@ -97,11 +122,10 @@ namespace JwtAuthentication.Controllers
 
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Content("Your order has been successfully updated");
         }
 
-        // PUT: api/Orders/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize("Saler")]
         [HttpPut]
         [Route("Orders/Confirm/{id}")]
         public async Task<IActionResult> ConfirmOrder(Guid id)
@@ -130,7 +154,7 @@ namespace JwtAuthentication.Controllers
 
             if (list.Count != orderd.Select(x => x.Product).Count())
             {
-                return Content("The quantity in stock is not enough for your order");
+                return Content("The quantity in stock is not enough for this order");
             }
 
             _context.Products.UpdateRange(list);
@@ -144,13 +168,11 @@ namespace JwtAuthentication.Controllers
             return Content("Confirmed");
         }
 
-        // POST: api/Orders
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Route("Orders/Checkout")]
         public async Task<ActionResult<OrderResponse>> PostOrderDetail(OrderRequest orderRequest)
         {
-            var user = _context.Users.Where(x => x.Id.Equals(orderRequest.UserId)).Include(x => x.Orders).FirstOrDefault();
+            var user = (User) HttpContext.Items["User"];
 
             var orderId = Guid.NewGuid();
 
@@ -188,12 +210,13 @@ namespace JwtAuthentication.Controllers
             };
         }
 
-        // DELETE: api/Orders/5
+        [Authorize("User")]
         [HttpDelete]
         [Route("Orders/Delete/{id}")]
         public async Task<IActionResult> DeleteOrder(Guid id)
         {
-            var order = await _context.Orders.FindAsync(id);
+
+            var order = await _context.Orders.Where(x => x.Id == id).FirstOrDefaultAsync();
             if (order == null)
             {
                 return NotFound();

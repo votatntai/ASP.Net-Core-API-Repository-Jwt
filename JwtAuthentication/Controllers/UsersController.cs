@@ -40,8 +40,17 @@ namespace JwtAuthentication.Controllers
                 Name = model.Name,
                 Username = model.Username,
                 Email = model.Email,
-                Password = model.Password
+                Password = model.Password,
+                Status = "Not Activated"
             };
+
+            var result = _userService.UserExist(user);
+
+            if (result != "Valid")
+            {
+                return Content(result);
+            }
+
             var ur = new UserRole();
             ur.UserId = userId;
             ur.RoleId = Guid.Parse("9c076c5c-d4d9-4426-b6bf-da7b01c49d81");
@@ -70,9 +79,16 @@ namespace JwtAuthentication.Controllers
                 Name = model.Name,
                 Username = model.Username,
                 Email = model.Email,
-                Password = model.Password
+                Password = model.Password,
+                Status = "Not Activated"
             };
 
+            var result = _userService.UserExist(user);
+
+            if (result != "Valid")
+            {
+                return Content(result);
+            }
 
             _userService.Register(user);
 
@@ -80,6 +96,7 @@ namespace JwtAuthentication.Controllers
 
         }
 
+        [Authorize("Admin")]
         [HttpGet]
         [Route("Users/View/{id}")]
         public UserResponse GetUser(Guid id)
@@ -95,9 +112,9 @@ namespace JwtAuthentication.Controllers
             };
         }
 
+        [Authorize("Admin")]
         [HttpGet]
         [Route("Users")]
-        [Authorize("Admin")]
         public IActionResult GetAll([FromQuery] Pagination param)
         {
             var users = _userService.GetAll(param);

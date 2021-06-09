@@ -25,6 +25,10 @@ public class AuthorizeAttribute : Attribute, IAuthorizationFilter
         }
         else
         {
+            if (user.Status == "Banned")
+            {
+                context.Result = new JsonResult(new { message = "Your account has been banned" }) { StatusCode = StatusCodes.Status403Forbidden };
+            }
             var userRoles = user.UserRoles.Select(x => x.Role.RoleName).ToList();
             var isValid = false;
             userRoles.ForEach(role =>

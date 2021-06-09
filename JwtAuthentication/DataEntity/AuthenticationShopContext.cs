@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthentication.DataEntity
 {
@@ -120,6 +118,9 @@ namespace JwtAuthentication.DataEntity
                 entity.HasIndex(e => e.Username, "UQ__Users__536C85E46F7DA8DF")
                     .IsUnique();
 
+                entity.HasIndex(e => e.Email, "UQ__Users__758C85E45R3DA4AC")
+                    .IsUnique();
+
                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
                 entity.Property(e => e.CreateDate)
@@ -143,6 +144,10 @@ namespace JwtAuthentication.DataEntity
                 entity.Property(e => e.Username)
                     .IsRequired()
                     .HasMaxLength(256);
+
+                entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(256);
             });
 
             modelBuilder.Entity<UserRole>(entity =>
