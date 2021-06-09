@@ -3,6 +3,7 @@ using JwtAuthentication.DataEntity;
 using JwtAuthentication.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections;
 using System.Linq;
 
 namespace JwtAuthentication.Controllers
@@ -17,7 +18,7 @@ namespace JwtAuthentication.Controllers
             _userService = userService;
         }
 
-        [HttpPost] 
+        [HttpPost]
         [Route("Users/Authenticate")]
         public IActionResult Authenticate(AuthenticateRequest model)
         {
@@ -48,7 +49,7 @@ namespace JwtAuthentication.Controllers
 
             if (result != "Valid")
             {
-                return Content(result);
+                return StatusCode(400, result);
             }
 
             var ur = new UserRole();
@@ -118,7 +119,10 @@ namespace JwtAuthentication.Controllers
         public IActionResult GetAll([FromQuery] Pagination param)
         {
             var users = _userService.GetAll(param);
-            return Ok(users);
+            return Ok(new ResponsePagination<UserResponse>(users)
+            {
+                Total = users.Count()
+            });
         }
     }
 }
