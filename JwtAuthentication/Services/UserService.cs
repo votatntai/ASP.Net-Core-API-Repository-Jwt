@@ -21,6 +21,7 @@ namespace JwtAuthentication.Services
         UserResponse Register(User user);
         string UserExist(User user);
         IEnumerable<UserResponse> GetAll(Pagination param);
+        int TotalUser();
         User GetById(Guid id);
     }
 
@@ -132,6 +133,11 @@ namespace JwtAuthentication.Services
                 Name = x.Name,
                 Roles = x.UserRoles.Select(x => x.Role.RoleName).ToArray()
             }).OrderBy(x => x.Email).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+        }
+
+        public int TotalUser()
+        {
+            return _context.Users.ToList().Count();
         }
 
         public User GetById(Guid id)
