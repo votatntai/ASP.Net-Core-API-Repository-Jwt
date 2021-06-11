@@ -183,16 +183,17 @@ namespace JwtAuthentication.Controllers
 
         [Authorize("Modifier")]
         [HttpPut]
-        [Route("Products/Update")]
-        public async Task<IActionResult> PutProduct(Guid id, ProductRequest pror)
+        [Route("Products/Update/{id}")]
+        public async Task<IActionResult> PutProduct([FromRoute] Guid id, ProductRequest pror)
         {
             if (!ProductExists(id))
             {
-                return NotFound();
+                return Content("The product does not exist");
             }
 
             var product = _context.Products.Where(x => x.Id == id).Select(a => new Product
             {
+                Id = a.Id,
                 Name = pror.Name,
                 Description = pror.Description,
                 Maker = pror.Maker,
@@ -201,6 +202,7 @@ namespace JwtAuthentication.Controllers
                 Quantity = pror.Quantity,
                 MinQuantity = pror.MinQuantity,
                 ImageUrl = pror.ImageUrl,
+                CreateDate = a.CreateDate
             }).FirstOrDefault();
 
             _context.Update(product);
