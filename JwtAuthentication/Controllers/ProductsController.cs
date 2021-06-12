@@ -188,7 +188,7 @@ namespace JwtAuthentication.Controllers
         {
             if (!ProductExists(id))
             {
-                return Content("The product does not exist");
+                return StatusCode(404, "The product does not exist");
             }
 
             var product = _context.Products.Where(x => x.Id == id).Select(a => new Product

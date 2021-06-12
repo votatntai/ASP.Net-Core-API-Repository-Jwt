@@ -77,6 +77,43 @@ namespace JwtAuthentication.Controllers
             return order;
         }
 
+        //[Authorize("User")]
+        [HttpGet]
+        [Route("Orders/Email/{email}")]
+        public async Task<ActionResult<ICollection<OrderResponse>>> GetOrdersByEmail([FromQuery] Pagination param, [FromRoute] string email)
+        {
+            var user = _context.Users.Where(x => x.Email == email).FirstOrDefault();
+
+            if (user == null)
+            {
+                return StatusCode(404, "Email does not exist");
+            }
+
+            var orders = await _context.Orders.Where(x => x.UserId == user.Id).Include(x => x.OrderDetails).Select(x => new OrderResponse
+            {
+                Id = x.Id,
+                Status = x.Status,
+                UserId = x.UserId,
+                CreateDate = x.CreateDate,
+                OrderDetails = x.OrderDetails.Select(x => new OrderDetailsResponse
+                {
+                    OrderId = x.OrderId,
+                    ProductId = x.ProductId,
+                    CreateDate = x.CreateDate,
+                    Price = x.Price,
+                    Quantity = x.Quantity
+                }).ToArray()
+            }).ToListAsync();
+
+            var total = orders.Count();
+            var result = orders.OrderBy(x => x.CreateDate).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
+            return Ok(new ResponsePagination<OrderResponse>(result)
+            {
+                Total = total,
+                Type = "Orders"
+            });
+        }
+
         [Authorize("User")]
         [HttpGet]
         [Route("Orders/MyOrders")]
@@ -147,7 +184,7 @@ namespace JwtAuthentication.Controllers
 
             if (order.Status == "Confirmed")
             {
-                return Content("Previously confirmed order");
+                return StatusCode(409, "Previously confirmed order");
             }
 
             var orderd = _context.OrderDetails.Where(a => a.OrderId == id).ToList();
@@ -167,7 +204,7 @@ namespace JwtAuthentication.Controllers
 
             if (list.Count != orderd.Select(x => x.Product).Count())
             {
-                return Content("The quantity in stock is not enough for this order");
+                return StatusCode(409, "The quantity in stock is not enough for this order");
             }
 
             _context.Products.UpdateRange(list);
