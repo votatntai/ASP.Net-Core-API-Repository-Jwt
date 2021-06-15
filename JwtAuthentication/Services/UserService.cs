@@ -19,6 +19,7 @@ namespace JwtAuthentication.Services
         AuthenticateResponse Authenticate(AuthenticateRequest model);
         UserResponse AddRoles(Guid id, UserRegisterWithRole model);
         UserResponse Register(User user);
+        string ActivateUser(Guid id);
         string UserExist(User user);
         IEnumerable<UserResponse> GetAll(Pagination param);
         int TotalUser();
@@ -55,6 +56,7 @@ namespace JwtAuthentication.Services
                 Name = user.Name,
                 Role = user.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
                 Username = user.Username,
+                Status = user.Status,
                 Token = token
             };
             return u;
@@ -92,6 +94,26 @@ namespace JwtAuthentication.Services
             return ur;
         }
 
+        public string ActivateUser(Guid id)
+        {
+            string result = "Successfull";
+            var u = _context.Users.Where(x => x.Id == id).FirstOrDefault();
+            if (u != null)
+            {
+                if (u.Status.Equals("Activated"))
+                {
+                    result = "User has been activated";
+                }
+                u.Status = "Activated";
+                _context.Users.Update(u);
+                _context.SaveChanges();
+            } else
+            {
+                result = "User does not exist";
+            }
+            return result;
+        }
+
         public UserResponse AddRoles(Guid id, UserRegisterWithRole model)
         {
             var roles = _context.Roles.ToList();
@@ -119,7 +141,8 @@ namespace JwtAuthentication.Services
                 Name = model.Name,
                 Email = model.Email,
                 Username = model.Username,
-                Roles = roleName
+                Roles = roleName,
+                Status = "Not Activated"
             };
         }
 
@@ -131,7 +154,8 @@ namespace JwtAuthentication.Services
                 Username = x.Username,
                 Email = x.Email,
                 Name = x.Name,
-                Roles = x.UserRoles.Select(x => x.Role.RoleName).ToArray()
+                Roles = x.UserRoles.Select(x => x.Role.RoleName).ToArray(),
+                Status = x.Status
             }).OrderBy(x => x.Email).Skip((param.PageNumber - 1) * param.PageSize).Take(param.PageSize).ToList();
         }
 

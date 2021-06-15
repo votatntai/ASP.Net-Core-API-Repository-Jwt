@@ -232,7 +232,7 @@ namespace JwtAuthentication.Controllers
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
-            return Content("The product has been successfully deleted");
+            return StatusCode(204, "The product has been successfully deleted");
         }
 
         private bool ProductExists(Guid id)

@@ -3,7 +3,6 @@ using JwtAuthentication.DataEntity;
 using JwtAuthentication.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections;
 using System.Linq;
 
 namespace JwtAuthentication.Controllers
@@ -98,18 +97,37 @@ namespace JwtAuthentication.Controllers
         }
 
         [Authorize("Admin")]
+        [HttpPut]
+        [Route("Users/Activate/{id}")]
+        public IActionResult ActivateUser([FromRoute] Guid id)
+        {
+            var result = _userService.ActivateUser(id);
+            if (result.Equals("User has been activated"))
+            {
+                return StatusCode(400, result);
+            }
+            if (result.Equals("User does not exist"))
+            {
+                return StatusCode(404, result);
+            }
+            return StatusCode(201, result);
+        }
+
+
+        [Authorize("Admin")]
         [HttpGet]
         [Route("Users/View/{id}")]
-        public UserResponse GetUser(Guid id)
+        public ActionResult<UserResponse> GetUser(Guid id)
         {
             var u = _userService.GetById(id);
             return new UserResponse
             {
                 Id = u.Id,
-                Roles = u.UserRoles.Select(x => x.Role?.RoleName).ToArray(),
+                Roles = u.UserRoles.Select(x => x.Role.RoleName).ToArray(),
                 Email = u.Email,
                 Name = u.Name,
-                Username = u.Username
+                Username = u.Username,
+                Status = u.Status
             };
         }
 
