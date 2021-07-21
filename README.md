@@ -8,6 +8,8 @@ Not available
 ## Features ##
 - Provide API to manage Users and Products.
 - Using Jwt Token to authenticate users and decentralize.
+- Using repository design pattern
+- Using depedency injection (DI)
 
 ## Author & License
 All of resource belongs to Janglee
